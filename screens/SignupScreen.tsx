@@ -258,11 +258,11 @@ export default function SignupScreen({ onDone }: SignupScreenProps) {
   }
 
   const handleLoginSubmit = () => {
-    const determinedRole = email.toLowerCase().includes('shop') || email.toLowerCase().includes('owner') ? 'owner' : 'customer'
+    const determinedRole = role === 'owner' ? 'owner' : (email.toLowerCase().includes('shop') || email.toLowerCase().includes('owner') ? 'owner' : 'customer')
     onDone({
       role: determinedRole,
       name: determinedRole === 'owner' ? (shopName || 'Campus Bites Cafe') : (name.trim() || 'Aditya Sharma'),
-      email: email || 'student@iiitt.ac.in',
+      email: email || (determinedRole === 'owner' ? 'owner@campusbites.com' : 'student@iiitt.ac.in'),
       phoneNumber: '+91 98765 43210'
     })
   }

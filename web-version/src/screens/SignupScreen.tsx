@@ -105,9 +105,9 @@ export default function SignupScreen({ onDone }: { onDone: (userData: any) => vo
       // Completed verify
       onDone({
         role,
-        name: role === 'customer' ? name : shopName,
-        email,
-        phoneNumber: phone,
+        name: role === 'customer' ? (name.trim() || 'Aditya Sharma') : (shopName.trim() || name.trim() || 'Campus Bites Cafe'),
+        email: email || (role === 'owner' ? 'owner@campusbites.com' : 'student@iiitt.ac.in'),
+        phoneNumber: phone || '+91 98765 43210',
         category: role === 'owner' ? effectiveCategory : undefined
       })
     }

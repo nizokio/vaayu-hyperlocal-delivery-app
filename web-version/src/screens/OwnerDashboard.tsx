@@ -41,6 +41,7 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
       total: 320,
       paymentMode: 'Cash on Delivery',
       status: 'incoming',
+      deliveryMode: 'instant',
       expireTime: Date.now() + 12 * 60 * 1000
     },
     {
@@ -48,6 +49,8 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
       customerName: 'Rohan Mehta',
       location: 'Block C, Room 305',
       landmark: 'Lift area',
+      deliveryMode: 'regular',
+      selectedSlotLabel: '12:00 PM – 2:00 PM',
       items: [
         { id: 'cb_2', name: 'Salted French Fries', quantity: 1, price: 80, accepted: true }
       ],
@@ -224,6 +227,23 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
                     <div className="bg-red-50 border border-red-200 rounded-xl p-2.5 flex justify-between items-center text-xs">
                       <span className="font-black text-red-700">⏱️ Time left to Accept:</span>
                       <span className="font-black text-red-700 font-mono text-sm">{remainingStr}</span>
+                    </div>
+                  )}
+
+                  {/* Delivery Mode Badge: Scheduled (GREEN) vs Instant (BLUE) */}
+                  {order.deliveryMode === 'regular' || order.selectedSlotLabel ? (
+                    <div className="bg-green-50 border border-green-200 rounded-xl p-2.5 flex justify-between items-center text-xs">
+                      <span className="font-black text-green-700 uppercase">🟢 SCHEDULED ORDER</span>
+                      <span className="font-bold text-green-800">
+                        Slot: <strong className="font-black text-green-900">{order.selectedSlotLabel || '12:00 PM – 2:00 PM'}</strong>
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-2.5 flex justify-between items-center text-xs">
+                      <span className="font-black text-blue-700 uppercase">⚡ INSTANT DELIVERY</span>
+                      <span className="font-bold text-blue-800">
+                        Deliver By: <strong className="font-black text-blue-900">Within 15 Mins</strong>
+                      </span>
                     </div>
                   )}
 
@@ -443,31 +463,37 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
         </div>
       )}
 
-      {/* Simple 3-Tab Bottom Bar */}
-      <div className="fixed bottom-0 inset-x-0 bg-white border-t border-gray-300 flex items-center justify-around h-16 z-40 max-w-[430px] mx-auto">
-        <button
-          onClick={() => setActiveTab('orders')}
-          className={`flex flex-col items-center flex-1 cursor-pointer ${activeTab === 'orders' ? 'text-green-600 font-bold' : 'text-gray-500'}`}
-        >
-          <span className="text-xl">📋</span>
-          <span className="text-[11px] font-black mt-0.5">Orders</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('menu')}
-          className={`flex flex-col items-center flex-1 cursor-pointer ${activeTab === 'menu' ? 'text-green-600 font-bold' : 'text-gray-500'}`}
-        >
-          <span className="text-xl">🍔</span>
-          <span className="text-[11px] font-black mt-0.5">Food Stock</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('settings')}
-          className={`flex flex-col items-center flex-1 cursor-pointer ${activeTab === 'settings' ? 'text-green-600 font-bold' : 'text-gray-500'}`}
-        >
-          <span className="text-xl">⚙️</span>
-          <span className="text-[11px] font-black mt-0.5">Settings</span>
-        </button>
+      {/* ── Framer Motion Sliding Bottom Nav Capsule (Customer Dashboard Style) ── */}
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40" style={{ width: 'calc(100% - 32px)', maxWidth: 390 }}>
+        <div className="bg-white/95 backdrop-blur-md rounded-[28px] shadow-[0_8px_32px_rgba(0,0,0,0.14)] border border-white/60 p-1">
+          <div className="flex items-center justify-around relative px-2 py-1.5">
+            {[
+              { id: 'orders', label: 'Orders', icon: '📋' },
+              { id: 'menu', label: 'Food Stock', icon: '🍔' },
+              { id: 'settings', label: 'Settings', icon: '⚙️' },
+            ].map(({ id, label, icon }) => {
+              const isActive = activeTab === id
+              return (
+                <button
+                  key={id}
+                  onClick={() => setActiveTab(id as any)}
+                  className="relative flex items-center gap-1.5 py-2 px-4 rounded-full overflow-hidden transition-colors cursor-pointer select-none"
+                  style={{
+                    backgroundColor: isActive ? '#1a3a2a' : 'transparent',
+                    color: isActive ? '#ffffff' : '#6b7280'
+                  }}
+                >
+                  <span className="text-sm">{icon}</span>
+                  {isActive && (
+                    <span className="text-[13px] font-bold text-white whitespace-nowrap">
+                      {label}
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        </div>
       </div>
     </div>
   )

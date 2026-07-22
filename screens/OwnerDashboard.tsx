@@ -3,9 +3,10 @@ import { View, Text, ScrollView, TouchableOpacity, Image, TextInput, Switch, Mod
 import tw from 'twrnc'
 import Svg, { Path, Rect, Circle, Line, Polyline } from 'react-native-svg'
 
-function IconOrders() {
+function IconOrders({ active }: { active: boolean }) {
+  const c = active ? "#ffffff" : "#6b7280"
   return (
-    <Svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+    <Svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2.5">
       <Path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
       <Polyline points="14 2 14 8 20 8" />
       <Line x1="16" y1="13" x2="8" y2="13" />
@@ -14,17 +15,19 @@ function IconOrders() {
   )
 }
 
-function IconMenu() {
+function IconMenu({ active }: { active: boolean }) {
+  const c = active ? "#ffffff" : "#6b7280"
   return (
-    <Svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+    <Svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2.5">
       <Path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
     </Svg>
   )
 }
 
-function IconSettings() {
+function IconSettings({ active }: { active: boolean }) {
+  const c = active ? "#ffffff" : "#6b7280"
   return (
-    <Svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+    <Svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2.5">
       <Circle cx="12" cy="12" r="3" />
       <Path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
     </Svg>
@@ -65,6 +68,7 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
       customerName: 'Aditya Sharma',
       location: 'Block A, Room 102',
       landmark: 'Near Reception',
+      deliveryMode: 'instant',
       items: [
         { id: 'cb_1', name: 'Spicy Paneer Burger', quantity: 2, price: 120, accepted: true },
         { id: 'cb_2', name: 'Salted French Fries', quantity: 1, price: 80, accepted: true }
@@ -79,6 +83,8 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
       customerName: 'Rohan Mehta',
       location: 'Block C, Room 305',
       landmark: 'Lift area',
+      deliveryMode: 'regular',
+      selectedSlotLabel: '12:00 PM – 2:00 PM',
       items: [
         { id: 'cb_2', name: 'Salted French Fries', quantity: 1, price: 80, accepted: true }
       ],
@@ -266,6 +272,23 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
                     <View style={tw`bg-red-50 border border-red-200 rounded-xl p-2.5 flex-row justify-between items-center`}>
                       <Text style={tw`text-[12px] font-black text-red-700`}>⏱️ Time left to Accept:</Text>
                       <Text style={tw`text-[16px] font-black text-red-700 font-mono`}>{remainingStr}</Text>
+                    </View>
+                  )}
+
+                  {/* Delivery Mode Badge: Scheduled (GREEN) vs Instant (BLUE) */}
+                  {order.deliveryMode === 'regular' || order.selectedSlotLabel ? (
+                    <View style={tw`bg-green-50 border border-green-200 rounded-xl px-3 py-2 flex-row items-center justify-between`}>
+                      <Text style={tw`text-[11px] font-black text-green-700 uppercase`}>🟢 SCHEDULED ORDER</Text>
+                      <Text style={tw`text-[12px] font-bold text-green-800`}>
+                        Slot: <Text style={tw`font-black text-green-900`}>{order.selectedSlotLabel || '12:00 PM – 2:00 PM'}</Text>
+                      </Text>
+                    </View>
+                  ) : (
+                    <View style={tw`bg-blue-50 border border-blue-200 rounded-xl px-3 py-2 flex-row items-center justify-between`}>
+                      <Text style={tw`text-[11px] font-black text-blue-700 uppercase`}>⚡ INSTANT DELIVERY</Text>
+                      <Text style={tw`text-[12px] font-bold text-blue-800`}>
+                        Deliver By: <Text style={tw`font-black text-blue-900`}>Within 15 Mins</Text>
+                      </Text>
                     </View>
                   )}
 
@@ -487,22 +510,34 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
         </View>
       </Modal>
 
-      {/* Simple 3-Tab Bottom Bar */}
-      <View style={tw`absolute bottom-0 inset-x-0 bg-white border-t border-gray-300 flex-row h-16 items-center justify-around px-2`}>
-        <TouchableOpacity onPress={() => setActiveTab('orders')} style={tw`items-center flex-1`}>
-          <Text style={{ color: activeTab === 'orders' ? '#16a34a' : '#6b7280' }}><IconOrders /></Text>
-          <Text style={[tw`text-[11px] font-black mt-0.5`, { color: activeTab === 'orders' ? '#16a34a' : '#6b7280' }]}>Orders</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => setActiveTab('menu')} style={tw`items-center flex-1`}>
-          <Text style={{ color: activeTab === 'menu' ? '#16a34a' : '#6b7280' }}><IconMenu /></Text>
-          <Text style={[tw`text-[11px] font-black mt-0.5`, { color: activeTab === 'menu' ? '#16a34a' : '#6b7280' }]}>Food Stock</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => setActiveTab('settings')} style={tw`items-center flex-1`}>
-          <Text style={{ color: activeTab === 'settings' ? '#16a34a' : '#6b7280' }}><IconSettings /></Text>
-          <Text style={[tw`text-[11px] font-black mt-0.5`, { color: activeTab === 'settings' ? '#16a34a' : '#6b7280' }]}>Settings</Text>
-        </TouchableOpacity>
+      {/* ── Sliding Capsule Bottom Navigation Bar (Customer Dashboard Style) ── */}
+      <View style={tw`absolute bottom-4 left-4 right-4 z-40`}>
+        <View style={[tw`rounded-[28px] p-1 border shadow-xl`, { backgroundColor: 'rgba(255, 255, 255, 0.96)', borderColor: 'rgba(255, 255, 255, 0.6)' }]}>
+          <View style={tw`flex-row items-center justify-around py-1 px-1`}>
+            {[
+              { id: 'orders', label: 'Orders', Icon: IconOrders },
+              { id: 'menu', label: 'Food Stock', Icon: IconMenu },
+              { id: 'settings', label: 'Settings', Icon: IconSettings },
+            ].map(({ id, label, Icon }) => {
+              const isActive = activeTab === id
+              return (
+                <TouchableOpacity
+                  key={id}
+                  onPress={() => setActiveTab(id as any)}
+                  style={[
+                    tw`flex-row items-center py-2.5 px-4 rounded-full`,
+                    { backgroundColor: isActive ? '#1a3a2a' : 'transparent' }
+                  ]}
+                >
+                  <Icon active={isActive} />
+                  {isActive && (
+                    <Text style={tw`text-[13px] font-black text-white ml-2`}>{label}</Text>
+                  )}
+                </TouchableOpacity>
+              )
+            })}
+          </View>
+        </View>
       </View>
     </View>
   )
