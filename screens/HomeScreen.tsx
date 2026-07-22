@@ -504,10 +504,6 @@ export default function HomeScreen({
                   <Text style={tw`text-[12px] text-gray-400 font-medium mb-3`}>{shop.tag}</Text>
 
                   <View style={tw`flex-row items-center justify-between pt-2 border-t border-gray-100`}>
-                    <View style={tw`flex-row items-center gap-1`}>
-                      <IconClock color="#6b7280" size={12} />
-                      <Text style={tw`text-[11px] text-gray-500 font-bold`}>{shop.time}</Text>
-                    </View>
                     <Text style={[tw`text-[11px] font-extrabold`, { color: '#8fda58' }]}>{shop.discount}</Text>
                   </View>
                 </View>

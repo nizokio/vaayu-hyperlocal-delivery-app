@@ -291,13 +291,7 @@ export default function CartScreen({
           ) : null}
         </View>
 
-        {/* Delivery info */}
-        <View style={[tw`mx-4 mt-3 border rounded-2xl px-4 py-3 flex-row items-center gap-2`, { backgroundColor: '#eeeff5', borderColor: '#eeeff5' }]}>
-          <Text style={tw`text-lg`}>🚴</Text>
-          <Text style={[tw`text-[12px] font-semibold`, { color: '#8fda58' }]}>
-            {deliveryFee === 0 ? 'Free delivery on this order!' : `Add ₹${200 - subtotal} more for free delivery`}
-          </Text>
-        </View>
+
 
         {/* Payment mode banner */}
         <View style={[tw`mx-4 mt-3 border rounded-2xl p-4 flex-row gap-3`, { backgroundColor: '#eeeff5', borderColor: '#eeeff5' }]}>
@@ -360,7 +354,7 @@ export default function CartScreen({
       </ScrollView>
 
       {/* Checkout Button Capsule */}
-      <View style={tw`absolute bottom-0 inset-x-0 bg-white border-t border-gray-100 px-4 pt-3 pb-6 flex-row`}>
+      <View style={tw`absolute bottom-0 inset-x-0 bg-white border-t border-gray-100 px-4 pt-3 pb-24 flex-row`}>
         <TouchableOpacity
           onPress={handlePlaceOrder}
           style={[tw`w-full py-4 rounded-2xl flex-row items-center justify-between px-6 shadow-md`, { backgroundColor: '#8fda58' }]}

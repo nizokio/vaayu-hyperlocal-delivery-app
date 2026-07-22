@@ -1032,11 +1032,6 @@ export default function App() {
                               <IconStar />
                               <span className="text-[12px] font-bold text-gray-800">{shop.rating}</span>
                             </div>
-                            <span className="text-gray-300">·</span>
-                            <div className="flex items-center gap-1 text-gray-500">
-                              <IconClock />
-                              <span className="text-[11px] font-medium">{shop.time}</span>
-                            </div>
                           </div>
                         </div>
                       </motion.div>
@@ -1075,10 +1070,6 @@ export default function App() {
                             <div className="flex items-center gap-0.5">
                               <IconStar />
                               <span className="text-[12px] font-bold text-gray-800">{shop.rating}</span>
-                            </div>
-                            <div className="flex items-center gap-1 text-gray-400">
-                              <IconClock />
-                              <span className="text-[11px] font-medium text-gray-500">{shop.time}</span>
                             </div>
                             <span className="ml-auto text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Partner</span>
                           </div>

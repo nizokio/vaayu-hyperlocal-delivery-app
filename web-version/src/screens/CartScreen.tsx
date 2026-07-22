@@ -146,14 +146,6 @@ export default function CartScreen() {
           )}
         </div>
 
-        {/* Delivery info */}
-        <div className="mx-4 mt-3 bg-green-50 border border-green-100 rounded-2xl px-4 py-3 flex items-center gap-2">
-          <span className="text-lg">🚴</span>
-          <p className="text-[12px] text-green-700 font-semibold">
-            {deliveryFee === 0 ? 'Free delivery on this order!' : `Add ₹${200 - subtotal} more for free delivery`}
-          </p>
-        </div>
-
         {/* Bill summary */}
         <div className="mx-4 mt-3 bg-white rounded-3xl p-4 shadow-sm">
           <p className="text-[14px] font-bold text-gray-900 mb-3">Bill summary</p>
@@ -185,7 +177,7 @@ export default function CartScreen() {
       </div>
 
       {/* Checkout button */}
-      <div className="px-4 pt-3 pb-4 bg-white border-t border-gray-100">
+      <div className="px-4 pt-3 pb-24 bg-white border-t border-gray-100">
         <button
           onClick={() => setPlaced(true)}
           className="w-full py-4 rounded-2xl text-[16px] font-black text-white flex items-center justify-between px-6 transition-all active:scale-[0.98]"
