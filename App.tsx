@@ -385,8 +385,8 @@ export default function App() {
     )
   }
 
-  // If partner / owner logs in, show merchant dashboard
-  if (user.role === 'owner') {
+  // If partner / owner / worker staff logs in, show merchant dashboard
+  if (user.role === 'owner' || user.role === 'worker') {
     return (
       <SafeAreaView style={[tw`flex-1`, { backgroundColor: '#ffffff' }]}>
         <StatusBar style="dark" backgroundColor="#ffffff" />

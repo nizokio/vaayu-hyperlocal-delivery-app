@@ -474,7 +474,11 @@ export default function HomeScreen({
                     style={tw`w-full h-full`}
                     resizeMode="cover"
                   />
-                  {shop.badge ? (
+                  {shop.isLive === false ? (
+                    <View style={tw`absolute top-3 left-3 px-2.5 py-1 rounded-full bg-red-600`}>
+                      <Text style={tw`text-[10px] font-black text-white uppercase`}>OFFLINE TODAY</Text>
+                    </View>
+                  ) : shop.badge ? (
                     <View style={[tw`absolute top-3 left-3 px-2.5 py-1 rounded-full`, { backgroundColor: '#8fda58' }]}>
                       <Text style={tw`text-[10px] font-black text-white uppercase`}>{shop.badge}</Text>
                     </View>

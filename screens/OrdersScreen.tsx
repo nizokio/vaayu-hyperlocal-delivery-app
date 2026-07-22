@@ -4,10 +4,13 @@ import tw from 'twrnc'
 import Svg, { Path, Polyline, Circle, Line } from 'react-native-svg'
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
-  delivered:   { label: 'Delivered',    color: '#8fda58', bg: '#eeeff5', dot: '#8fda58' },
-  on_the_way:  { label: 'On the way',  color: '#2563eb', bg: '#eff6ff', dot: '#2563eb' },
-  preparing:   { label: 'Preparing',   color: '#d97706', bg: '#fffbeb', dot: '#d97706' },
-  cancelled:   { label: 'Cancelled',   color: '#dc2626', bg: '#fef2f2', dot: '#dc2626' },
+  delivered:   { label: 'Delivered',            color: '#8fda58', bg: '#eeeff5', dot: '#8fda58' },
+  delivering:  { label: 'Out for Delivery',     color: '#7c3aed', bg: '#f3e8ff', dot: '#7c3aed' },
+  on_the_way:  { label: 'Out for Delivery',     color: '#7c3aed', bg: '#f3e8ff', dot: '#7c3aed' },
+  preparing:   { label: 'Accepted & Preparing', color: '#ea580c', bg: '#ffedd5', dot: '#ea580c' },
+  incoming:    { label: 'Order Placed',         color: '#2563eb', bg: '#eff6ff', dot: '#2563eb' },
+  pending:     { label: 'Order Placed',         color: '#2563eb', bg: '#eff6ff', dot: '#2563eb' },
+  cancelled:   { label: 'Cancelled',           color: '#dc2626', bg: '#fef2f2', dot: '#dc2626' },
 }
 
 const tabs = ['All', 'Active', 'Past']
@@ -23,14 +26,14 @@ function LiveTracker() {
             <Text style={[tw`text-[12px] font-medium mt-0.5`, { color: '#eeeff5' }]}>Cappuccino x2 · Chocolate Muffin x1</Text>
           </View>
           <View style={tw`bg-white/20 rounded-2xl px-3 py-1.5 items-center`}>
-            <Text style={tw`text-white font-black text-[20px] leading-none`}>5</Text>
-            <Text style={[tw`text-[9px] font-bold uppercase`, { color: '#eeeff5' }]}>min</Text>
+            <Text style={tw`text-white font-black text-[16px] leading-none`}>12:45</Text>
+            <Text style={[tw`text-[9px] font-bold uppercase`, { color: '#eeeff5' }]}>left</Text>
           </View>
         </View>
 
         {/* Progress steps */}
         <View style={tw`flex-row items-center mt-4`}>
-          {['Placed', 'Preparing', 'On the way', 'Delivered'].map((step, i) => {
+          {['Placed', 'Preparing', 'Out for Delivery', 'Delivered'].map((step, i) => {
             const done = i < 2
             const active = i === 2
             return (
@@ -54,7 +57,7 @@ function LiveTracker() {
                   </View>
                   {i < 3 && <View style={[tw`flex-1 h-0.5`, { backgroundColor: done ? '#c084fc' : 'rgba(255,255,255,0.2)' }]} />}
                 </View>
-                <Text style={[tw`text-[9px] font-semibold mt-1.5`, { color: done || active ? '#eeeff5' : 'rgba(255,255,255,0.4)' }]}>{step}</Text>
+                <Text style={[tw`text-[8px] font-semibold mt-1.5 text-center`, { color: done || active ? '#eeeff5' : 'rgba(255,255,255,0.4)' }]}>{step}</Text>
               </View>
             )
           })}
