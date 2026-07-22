@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import SignupScreen from './screens/SignupScreen'
+import OwnerDashboard from './screens/OwnerDashboard'
+import ProfileScreen from './screens/ProfileScreen'
 
 // ── Figma Icons (SVG Components) ─────────────────────────────────────────────
 
@@ -327,7 +330,7 @@ export default function App() {
   const [selectedShop, setSelectedShop] = useState<any>(null)
   
   // User Profile
-  const [user] = useState({ name: 'Aditya Campus', phoneNumber: '+91 98765 43210' })
+  const [user, setUser] = useState<any>(null)
 
   // Cart State
   const [cartItems, setCartItems] = useState<any[]>([])
@@ -453,6 +456,28 @@ export default function App() {
   const subtotal = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
   const deliveryFee = subtotal === 0 ? 0 : subtotal >= 150 ? 0 : 15
   const cartTotal = subtotal + deliveryFee
+
+  if (!user) {
+    return (
+      <div
+        className="min-h-screen bg-gray-50 font-sans antialiased text-gray-900 selection:bg-green-100 selection:text-green-800"
+        style={{ fontFamily: "'Inter', sans-serif", maxWidth: 430, margin: '0 auto', position: 'relative' }}
+      >
+        <SignupScreen onDone={(userData) => { setUser(userData); showToast("Welcome to Vaayu!") }} />
+      </div>
+    )
+  }
+
+  if (user.role === 'owner') {
+    return (
+      <div
+        className="min-h-screen bg-gray-50 font-sans antialiased text-gray-900 selection:bg-green-100 selection:text-green-800"
+        style={{ fontFamily: "'Inter', sans-serif", maxWidth: 430, margin: '0 auto', position: 'relative' }}
+      >
+        <OwnerDashboard user={user} onSignOut={() => setUser(null)} />
+      </div>
+    )
+  }
 
   return (
     <div
@@ -1288,69 +1313,11 @@ export default function App() {
             )}
 
             {activeTab === 'profile' && (
-              /* ── Profile & Address Settings Screen ── */
-              <div className="p-4">
-                <div className="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm text-center">
-                  <motion.div
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    className="w-16 h-16 bg-[#1a3a2a] text-white text-2xl font-black rounded-full flex items-center justify-center mx-auto mb-3 shadow-md cursor-pointer"
-                  >
-                    {user?.name?.charAt(0).toUpperCase() || 'A'}
-                  </motion.div>
-                  <h3 className="text-lg font-bold text-gray-900">{user?.name || 'Aditya Campus'}</h3>
-                  <p className="text-xs text-gray-400 mt-0.5">{user?.phoneNumber || '+91 98765 43210'}</p>
-                  <span className="inline-block mt-3 bg-green-50 text-green-600 text-[10px] font-bold px-3 py-1 rounded-full shadow-xs">STUDENT PROFILE</span>
-                </div>
-
-                {/* Delivery Settings Form */}
-                <div className="bg-white rounded-3xl border border-gray-100 p-5 mt-4 shadow-sm">
-                  <p className="font-bold text-gray-900 text-sm mb-4">Default Campus Address</p>
-                  <div className="flex flex-col gap-3">
-                    <div>
-                      <label className="text-[10px] font-bold text-gray-400 uppercase">Hostel Name / Sector</label>
-                      <input
-                        type="text"
-                        value={address.area}
-                        onChange={e => setAddress(prev => ({ ...prev, area: e.target.value }))}
-                        className="w-full bg-gray-50 border border-gray-100 rounded-lg p-2.5 text-xs font-medium outline-none mt-1 focus:bg-white focus:ring-1 focus:ring-green-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-bold text-gray-400 uppercase">Room Number / Block</label>
-                      <input
-                        type="text"
-                        value={address.room}
-                        onChange={e => setAddress(prev => ({ ...prev, room: e.target.value }))}
-                        className="w-full bg-gray-50 border border-gray-100 rounded-lg p-2.5 text-xs font-medium outline-none mt-1 focus:bg-white focus:ring-1 focus:ring-green-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-bold text-gray-400 uppercase">Directions / Landmark</label>
-                      <input
-                        type="text"
-                        value={address.landmark}
-                        onChange={e => setAddress(prev => ({ ...prev, landmark: e.target.value }))}
-                        className="w-full bg-gray-50 border border-gray-100 rounded-lg p-2.5 text-xs font-medium outline-none mt-1 focus:bg-white focus:ring-1 focus:ring-green-500"
-                      />
-                    </div>
-
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => showToast("Default address updated successfully!")}
-                      className="mt-3 bg-[#1a3a2a] text-white text-xs font-bold py-3 rounded-xl hover:bg-black transition-colors shadow-md"
-                    >
-                      Save Address
-                    </motion.button>
-                  </div>
-                </div>
-
-                {/* General warning info card */}
-                <div className="bg-red-50 border border-red-100 rounded-2xl p-4 mt-4 flex gap-3 text-red-900 text-xs shadow-xs">
-                  <span>⚠️</span>
-                  <p className="leading-snug">Deliveries are managed directly by campus shop staff. Please check items at the door before payment.</p>
-                </div>
-              </div>
+              <ProfileScreen user={user} onSignOut={() => {
+                setUser(null)
+                setCartItems([])
+                setCartShop(null)
+              }} />
             )}
           </motion.div>
         )}

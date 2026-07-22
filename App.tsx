@@ -11,6 +11,7 @@ import OrdersScreen from './screens/OrdersScreen'
 import ProfileScreen from './screens/ProfileScreen'
 import SignupScreen from './screens/SignupScreen'
 import ShopDetailsScreen from './screens/ShopDetailsScreen'
+import OwnerDashboard from './screens/OwnerDashboard'
 import { BACKEND_URL } from './screens/apiConfig'
 
 type TabId = "home" | "orders" | "cart" | "profile"
@@ -381,6 +382,16 @@ export default function App() {
       <SignupScreen
         onDone={handleSignup}
       />
+    )
+  }
+
+  // If partner / owner logs in, show merchant dashboard
+  if (user.role === 'owner') {
+    return (
+      <SafeAreaView style={[tw`flex-1`, { backgroundColor: '#ffffff' }]}>
+        <StatusBar style="dark" backgroundColor="#ffffff" />
+        <OwnerDashboard user={user} onSignOut={() => setUser(null)} />
+      </SafeAreaView>
     )
   }
 

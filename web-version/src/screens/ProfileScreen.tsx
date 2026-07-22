@@ -36,15 +36,15 @@ function BackHeader({ title, onBack }: { title: string; onBack: () => void }) {
   )
 }
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ user, onSignOut }: { user: any; onSignOut: () => void }) {
   const [activeModal, setActiveModal] = useState<string | null>(null)
   const [avatarUrl, setAvatarUrl] = useState(AVATAR_OPTIONS[0])
   const [showPhotoPicker, setShowPhotoPicker] = useState(false)
 
   // Edit profile state
-  const [name, setName] = useState('Aditya Sharma')
-  const [email] = useState('251420@iiitt.ac.in')
-  const [phone, setPhone] = useState('+91 98765 43210')
+  const [name, setName] = useState(user?.name || 'Aditya Sharma')
+  const [email] = useState(user?.email || '251420@iiitt.ac.in')
+  const [phone, setPhone] = useState(user?.phoneNumber || '+91 98765 43210')
   const [hostel] = useState('IIIT Tiruchirappalli, Gate 1')
 
   // Security state
@@ -422,7 +422,7 @@ export default function ProfileScreen() {
         {/* Sign out */}
         <div className="mx-4 mt-4">
           <button
-            onClick={() => window.location.reload()}
+            onClick={onSignOut}
             className="w-full py-3.5 rounded-2xl text-[14px] font-bold text-red-500 bg-red-50 hover:bg-red-100 transition-colors cursor-pointer"
           >
             Sign out
