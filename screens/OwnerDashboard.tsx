@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { View, Text, ScrollView, TouchableOpacity, Image, TextInput, Modal, Vibration, Alert } from 'react-native'
 import tw from 'twrnc'
 import Svg, { Path, Rect, Circle, Line, Polyline } from 'react-native-svg'
-import * as Haptics from 'expo-haptics'
+
 
 // Language Translations Dictionary for Low-Literacy Shop Owners
 const i18n: Record<string, Record<string, string>> = {
@@ -153,12 +153,12 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
 
   const t = i18n[lang] || i18n['en']
 
-  // Trigger haptic feedback helper
+  // Trigger haptic vibration feedback helper
   const triggerHaptic = () => {
     try {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+      Vibration.vibrate(80)
     } catch {
-      Vibration.vibrate(100)
+      // Fallback
     }
   }
 
