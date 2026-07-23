@@ -495,7 +495,7 @@ export default function App() {
       {/* ── Campus Notifications Modal Drawer (Overlays navigation bar) ── */}
       {showNotifications && (
         <View style={[tw`absolute inset-0 justify-end`, { backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100 }]}>
-          <View style={tw`bg-white rounded-t-3xl p-6 pb-10 border-t border-gray-100 max-h-[85%]`}>
+          <View style={tw`bg-white rounded-t-3xl p-6 pb-28 border-t border-gray-100 max-h-[85%]`}>
             <View style={tw`flex-row items-center justify-between pb-4 border-b border-gray-100 mb-4`}>
               <View style={tw`flex-row items-center gap-2`}>
                 <Text style={tw`text-2xl`}>🔔</Text>
@@ -551,9 +551,9 @@ export default function App() {
                 setShowNotifications(false)
                 showToast("All notifications marked as read")
               }}
-              style={[tw`w-full py-3.5 rounded-2xl items-center mt-5`, { backgroundColor: '#8fda58' }]}
+              style={[tw`w-full py-4 rounded-2xl items-center mt-5 mb-6`, { backgroundColor: '#8fda58' }]}
             >
-              <Text style={tw`text-[14px] font-black text-white`}>Mark All as Read</Text>
+              <Text style={tw`text-[15px] font-black text-white`}>Mark All as Read</Text>
             </TouchableOpacity>
           </View>
         </View>

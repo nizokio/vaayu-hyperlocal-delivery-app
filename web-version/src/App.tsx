@@ -516,7 +516,7 @@ export default function App() {
               exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
               onClick={e => e.stopPropagation()}
-              className="bg-white rounded-t-3xl p-6 pb-10 border-t border-gray-100 max-h-[85vh] overflow-y-auto"
+              className="bg-white rounded-t-3xl p-6 pb-28 border-t border-gray-100 max-h-[85vh] overflow-y-auto"
             >
               <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-4">
                 <div className="flex items-center gap-2">
@@ -571,7 +571,7 @@ export default function App() {
                   setShowNotifications(false)
                   showToast("All notifications marked as read")
                 }}
-                className="w-full py-3.5 rounded-2xl text-[14px] font-black text-white bg-[#1a3a2a] hover:bg-black transition-colors mt-5 shadow-sm"
+                className="w-full py-4 rounded-2xl text-[15px] font-black text-white bg-[#1a3a2a] hover:bg-black transition-colors mt-5 mb-6 shadow-sm cursor-pointer"
               >
                 Mark All as Read
               </button>
