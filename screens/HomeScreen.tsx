@@ -23,7 +23,7 @@ export const categories = [
     name: "Food",
     title: "FOOD",
     sub: "CANTEENS & CAFES",
-    badge: "15 MINS DELIVERY",
+    badge: "",
     img: require('../assets/categories/food.jpg'),
     isLarge: true,
   },
@@ -333,9 +333,11 @@ export default function HomeScreen({
                     <Text style={tw`text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2`}>
                       {food.sub}
                     </Text>
-                    <View style={tw`self-start bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100`}>
-                      <Text style={tw`text-[10px] font-black text-orange-600`}>{food.badge}</Text>
-                    </View>
+                    {food.badge ? (
+                      <View style={tw`self-start bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100`}>
+                        <Text style={tw`text-[10px] font-black text-orange-600`}>{food.badge}</Text>
+                      </View>
+                    ) : null}
                   </View>
                   <Image
                     source={food.img}
@@ -409,9 +411,11 @@ export default function HomeScreen({
                     <Text style={tw`text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2`}>
                       {grocery.sub}
                     </Text>
-                    <View style={tw`self-start bg-green-50 px-2 py-0.5 rounded-full border border-green-100`}>
-                      <Text style={tw`text-[9px] font-black text-green-700`}>{grocery.badge}</Text>
-                    </View>
+                    {grocery.badge ? (
+                      <View style={tw`self-start bg-green-50 px-2 py-0.5 rounded-full border border-green-100`}>
+                        <Text style={tw`text-[9px] font-black text-green-700`}>{grocery.badge}</Text>
+                      </View>
+                    ) : null}
                   </View>
                   <Image
                     source={grocery.img}

@@ -158,7 +158,7 @@ const categories = [
     name: "Food",
     title: "FOOD",
     sub: "CANTEENS & CAFES",
-    badge: "15 MINS DELIVERY",
+    badge: "",
     img: "/assets/categories/food.jpg",
     isLarge: true,
   },
@@ -904,9 +904,11 @@ export default function App() {
                           <div className="z-10">
                             <p className="text-[16px] font-black text-gray-900 tracking-tight leading-tight mb-0.5">{food.title}</p>
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">{food.sub}</p>
-                            <span className="inline-block bg-orange-50 text-orange-600 text-[10px] font-black px-2 py-0.5 rounded-full border border-orange-100">
-                              {food.badge}
-                            </span>
+                            {food.badge && (
+                              <span className="inline-block bg-orange-50 text-orange-600 text-[10px] font-black px-2 py-0.5 rounded-full border border-orange-100">
+                                {food.badge}
+                              </span>
+                            )}
                           </div>
                           <img
                             src={food.img}
@@ -966,9 +968,11 @@ export default function App() {
                           <div className="z-10">
                             <p className="text-[15px] font-black text-gray-900 tracking-tight leading-tight mb-0.5">{grocery.title}</p>
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">{grocery.sub}</p>
-                            <span className="inline-block bg-green-50 text-green-700 text-[9px] font-extrabold px-2 py-0.5 rounded-full border border-green-100">
-                              {grocery.badge}
-                            </span>
+                            {grocery.badge && (
+                              <span className="inline-block bg-green-50 text-green-700 text-[9px] font-extrabold px-2 py-0.5 rounded-full border border-green-100">
+                                {grocery.badge}
+                              </span>
+                            )}
                           </div>
                           <img
                             src={grocery.img}

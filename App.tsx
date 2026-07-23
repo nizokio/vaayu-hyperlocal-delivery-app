@@ -494,7 +494,7 @@ export default function App() {
 
       {/* ── Campus Notifications Modal Drawer (Overlays navigation bar) ── */}
       {showNotifications && (
-        <View style={[tw`absolute inset-0 justify-end`, { backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100, elevation: 100 }]}>
+        <View style={[tw`absolute inset-0 justify-end`, { backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100 }]}>
           <View style={tw`bg-white rounded-t-3xl p-6 pb-10 border-t border-gray-100 max-h-[85%]`}>
             <View style={tw`flex-row items-center justify-between pb-4 border-b border-gray-100 mb-4`}>
               <View style={tw`flex-row items-center gap-2`}>
