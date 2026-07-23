@@ -34,6 +34,16 @@ const i18n: Record<string, Record<string, string>> = {
     timeLeft: "TIME LEFT TO ACCEPT",
     scheduled: "🟢 SCHEDULED ORDER",
     instant: "⚡ INSTANT DELIVERY",
+    subtotal: "Food Items Subtotal",
+    deliveryFee: "Delivery Fee",
+    platformFee: "Platform Fee (Vaayu)",
+    grandTotal: "TOTAL FROM CUSTOMER",
+    financialSummary: "🏦 VAAYU FINANCIAL SETTLEMENT & RETURN VAULT",
+    instantDeliveryTag: "⚡ Instant Delivery Fees (₹10/order)",
+    scheduledDeliveryTag: "🟢 Scheduled Delivery Fees (₹5/order)",
+    platformFeeTag: "🛵 Platform Fees Owed to Vaayu (₹5/order)",
+    totalOwedToVaayu: "💸 CASH TO RETURN TO VAAYU",
+    shopNetEarnings: "💰 SHOP NET FOOD EARNINGS",
   },
   hi: {
     orders: "आर्डर",
@@ -68,6 +78,16 @@ const i18n: Record<string, Record<string, string>> = {
     timeLeft: "स्वीकार करने का समय",
     scheduled: "🟢 निर्धारित आर्डर",
     instant: "⚡ तुरंत डिलिवरी",
+    subtotal: "खाद्य सामग्री कुल",
+    deliveryFee: "डिलिवरी शुल्क",
+    platformFee: "वायु प्लेटफॉर्म शुल्क",
+    grandTotal: "ग्राहक से कुल प्राप्त राशि",
+    financialSummary: "🏦 वायु वित्तीय हिसाब और देय राशि",
+    instantDeliveryTag: "⚡ तुरंत डिलिवरी शुल्क (₹10/आर्डर)",
+    scheduledDeliveryTag: "🟢 निर्धारित डिलिवरी शुल्क (₹5/आर्डर)",
+    platformFeeTag: "🛵 वायु प्लेटफॉर्म शुल्क (₹5/आर्डर)",
+    totalOwedToVaayu: "💸 वायु को लौटाई जाने वाली कुल राशि",
+    shopNetEarnings: "💰 दुकानदार की शुद्ध खाद्य कमाई",
   },
   ta: {
     orders: "ஆர்டர்கள்",
@@ -102,6 +122,16 @@ const i18n: Record<string, Record<string, string>> = {
     timeLeft: "ஏற்றுக்கொள்ள நேரம்",
     scheduled: "🟢 திட்டமிடப்பட்ட ஆர்டர்",
     instant: "⚡ உடனடி டெலிவரி",
+    subtotal: "உணவு மொத்தம்",
+    deliveryFee: "டெலிவரி கட்டணம்",
+    platformFee: "வாயு பிளாட்ஃபார்ம் கட்டணம்",
+    grandTotal: "வாடிக்கையாளர் மொத்தம்",
+    financialSummary: "🏦 வாயு நிதி கணக்கு விவரம்",
+    instantDeliveryTag: "⚡ உடனடி டெலிவரி கட்டணம் (₹10/ஆர்டர்)",
+    scheduledDeliveryTag: "🟢 திட்டமிடப்பட்ட டெலிவரி கட்டணம் (₹5/ஆர்டர்)",
+    platformFeeTag: "🛵 வாயு கட்டணம் (₹5/ஆர்டர்)",
+    totalOwedToVaayu: "💸 வாயுவிற்கு செலுத்த வேண்டிய தொகை",
+    shopNetEarnings: "💰 கடை நிகர வருமானம்",
   }
 }
 
@@ -167,7 +197,6 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
         { id: 'cb_1', name: 'Spicy Paneer Burger', quantity: 2, price: 120, accepted: true },
         { id: 'cb_2', name: 'Salted French Fries', quantity: 1, price: 80, accepted: true }
       ],
-      total: 320,
       paymentMode: 'cod',
       status: 'incoming',
       expireTime: Date.now() + 12 * 60 * 1000,
@@ -183,13 +212,24 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
       items: [
         { id: 'cb_2', name: 'Salted French Fries', quantity: 1, price: 80, accepted: true }
       ],
-      total: 80,
       paymentMode: 'upi',
       status: 'preparing',
       expireTime: Date.now() - 5 * 60 * 1000,
       totalDuration: 15 * 60 * 1000
     }
   ])
+
+  // Helper to calculate full order breakdown (Items Subtotal + Delivery Fee + Platform Fee = Grand Total)
+  const getOrderBill = (order: any) => {
+    const isInstant = !(order.deliveryMode === 'regular' || order.selectedSlotLabel)
+    const deliveryFee = isInstant ? 10 : 5
+    const platformFee = 5
+    const itemsSubtotal = order.items
+      .filter((i: any) => i.accepted !== false)
+      .reduce((sum: number, i: any) => sum + i.price * i.quantity, 0)
+    const grandTotal = itemsSubtotal + (itemsSubtotal > 0 ? (deliveryFee + platformFee) : 0)
+    return { isInstant, itemsSubtotal, deliveryFee, platformFee, grandTotal }
+  }
 
   // Live timer tick
   const [now, setNow] = useState(Date.now())
@@ -271,11 +311,7 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
       return
     }
 
-    const newTotal = updatedItems
-      .filter((i: any) => i.accepted)
-      .reduce((sum: number, i: any) => sum + i.price * i.quantity, 0)
-
-    setOrders(prev => prev.map(o => o.id === partialOrder.id ? { ...o, items: updatedItems, total: newTotal, status: 'preparing' } : o))
+    setOrders(prev => prev.map(o => o.id === partialOrder.id ? { ...o, items: updatedItems, status: 'preparing' } : o))
     showToast(t.accept)
     setPartialOrder(null)
   }
@@ -309,7 +345,23 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
   }
 
   const incomingCount = orders.filter(o => o.status === 'incoming').length
-  const todayTotal = orders.filter(o => o.status === 'completed' || o.status === 'delivering' || o.status === 'preparing').reduce((s, o) => s + o.total, 0)
+
+  // Financial summary calculations
+  const validOrders = orders.filter(o => o.status !== 'cancelled')
+  const totalOrdersCount = validOrders.length
+
+  const instantOrdersCount = validOrders.filter(o => !(o.deliveryMode === 'regular' || o.selectedSlotLabel)).length
+  const instantDeliveryFeesTotal = instantOrdersCount * 10
+
+  const scheduledOrdersCount = validOrders.filter(o => (o.deliveryMode === 'regular' || o.selectedSlotLabel)).length
+  const scheduledDeliveryFeesTotal = scheduledOrdersCount * 5
+
+  const totalDeliveryFeesCollected = instantDeliveryFeesTotal + scheduledDeliveryFeesTotal
+  const totalPlatformFeesToVaayu = totalOrdersCount * 5
+  const totalAmountOwedToVaayu = totalDeliveryFeesCollected + totalPlatformFeesToVaayu
+
+  const todayTotalCashCollected = validOrders.reduce((sum, o) => sum + getOrderBill(o).grandTotal, 0)
+  const shopNetFoodEarnings = todayTotalCashCollected - totalAmountOwedToVaayu
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 pb-28 max-w-[430px] mx-auto relative select-none">
@@ -349,7 +401,7 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
           </div>
         </div>
 
-        {/* GIANT ZOMATO-STYLE DAILY GO-LIVE BUTTON (Min 56px height) */}
+        {/* GIANT ZOMATO-STYLE DAILY GO-LIVE BUTTON */}
         <button
           onClick={() => {
             const next = !isLiveToday
@@ -373,22 +425,23 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
 
         <div className="bg-white rounded-2xl p-4 border border-gray-200">
           <p className="text-[12px] font-black uppercase text-gray-500">{t.todayCash}</p>
-          <p className="text-[32px] font-black text-gray-900 mt-0.5">₹{todayTotal}</p>
+          <p className="text-[32px] font-black text-gray-900 mt-0.5">₹{todayTotalCashCollected}</p>
         </div>
       </div>
 
       <div className="px-4 flex-1">
-        {/* ── 1. ORDERS TAB (Low-Literacy Redesign) ── */}
+        {/* ── 1. ORDERS TAB (Detailed Fees Breakdown) ── */}
         {activeTab === 'orders' && (
           <div className="flex flex-col gap-4">
             <h2 className="text-[18px] font-black text-gray-900">{t.orders} ({orders.length})</h2>
 
             {orders.map(order => {
               const timer = getTimerDetails(order.expireTime, order.totalDuration)
+              const bill = getOrderBill(order)
 
               return (
                 <div key={order.id} className="bg-white rounded-3xl p-5 border-2 border-gray-300 shadow-md flex flex-col gap-3">
-                  {/* GIANT Order ID & Delivery Location (Primary Focal Point) */}
+                  {/* GIANT Order ID & Delivery Location */}
                   <div className="flex justify-between items-start border-b border-gray-100 pb-3">
                     <div>
                       <span className="text-[28px] font-black text-gray-900 block leading-none">{order.id}</span>
@@ -442,7 +495,7 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
                     </div>
                   )}
 
-                  {/* Ordered Items List */}
+                  {/* Items & Fees Breakdown List */}
                   <div className="bg-gray-50 rounded-2xl p-3 flex flex-col gap-2 border border-gray-200">
                     {order.items.map((it: any, idx: number) => (
                       <div key={idx} className="flex justify-between items-center text-[15px]">
@@ -452,13 +505,33 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
                         <span className="font-black text-gray-900">₹{it.price * it.quantity}</span>
                       </div>
                     ))}
-                    <div className="border-t border-gray-300 pt-2 mt-1 flex justify-between items-center">
-                      <span className="text-[16px] font-black text-gray-900">TOTAL</span>
-                      <span className="text-[20px] font-black text-green-700">₹{order.total}</span>
+
+                    <div className="border-t border-gray-200 pt-2 flex flex-col gap-1.5">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="font-bold text-gray-600">{t.subtotal}</span>
+                        <span className="font-black text-gray-800">₹{bill.itemsSubtotal}</span>
+                      </div>
+
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="font-bold text-blue-700">
+                          🛵 {t.deliveryFee} ({bill.isInstant ? '⚡ Instant ₹10' : '🟢 Scheduled ₹5'})
+                        </span>
+                        <span className="font-black text-blue-800">+₹{bill.deliveryFee}</span>
+                      </div>
+
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="font-bold text-purple-700">⚡ {t.platformFee}</span>
+                        <span className="font-black text-purple-800">+₹{bill.platformFee}</span>
+                      </div>
+
+                      <div className="border-t border-gray-300 pt-2 mt-1 flex justify-between items-center">
+                        <span className="text-[15px] font-black text-gray-900">{t.grandTotal}</span>
+                        <span className="text-[20px] font-black text-green-700">₹{bill.grandTotal}</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* 30% TALLER ACTION BUTTONS (Min 56px height) */}
+                  {/* 30% TALLER ACTION BUTTONS */}
                   <div className="flex flex-col gap-2.5 mt-1">
                     {order.status === 'incoming' && (
                       <>
@@ -466,7 +539,7 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
                           onClick={() => handleOpenAcceptModal(order)}
                           className="w-full h-14 bg-green-600 hover:bg-green-700 text-white font-black text-[17px] uppercase rounded-2xl shadow-lg transition-transform active:scale-[0.98] cursor-pointer"
                         >
-                          {t.accept} (₹{order.total})
+                          {t.accept} (₹{bill.grandTotal})
                         </button>
 
                         <button
@@ -514,14 +587,13 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
           </div>
         )}
 
-        {/* ── 2. FOOD STOCK SCREEN (Photos & Giant Stock Switch) ── */}
+        {/* ── 2. FOOD STOCK SCREEN ── */}
         {activeTab === 'menu' && (
           <div className="flex flex-col gap-4">
             {/* Camera-First Form */}
             <div className="bg-white rounded-3xl p-5 border-2 border-gray-300 flex flex-col gap-4 shadow-sm">
               <h2 className="text-[18px] font-black text-gray-900">{t.addFood}</h2>
               
-              {/* Camera Upload Button First */}
               <button
                 onClick={() => showToast("Photo attached!")}
                 className="w-full h-24 bg-green-50 border-2 border-dashed border-green-500 rounded-2xl flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-green-100 transition-colors"
@@ -566,7 +638,6 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
                     <p className="text-[15px] font-black text-green-700 mt-0.5">₹{item.price}</p>
                   </div>
 
-                  {/* GIANT SINGLE-TAP STOCK TOGGLE */}
                   <button
                     onClick={() => {
                       triggerBeep()
@@ -584,9 +655,47 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
           </div>
         )}
 
-        {/* ── 3. SETTINGS & LANGUAGE TOGGLE ── */}
+        {/* ── 3. SETTINGS & VAAYU FINANCIAL BREAKDOWN VAULT ── */}
         {activeTab === 'settings' && (
           <div className="flex flex-col gap-4">
+            {/* VAAYU FINANCIAL SETTLEMENT VAULT */}
+            <div className="bg-white rounded-3xl p-5 border-2 border-purple-300 flex flex-col gap-4 shadow-sm">
+              <h2 className="text-[17px] font-black text-purple-900 uppercase">{t.financialSummary}</h2>
+              
+              <div className="bg-purple-50 rounded-2xl p-4 border border-purple-200 flex flex-col gap-2.5">
+                <div className="flex justify-between items-center pb-2 border-b border-purple-200 text-xs">
+                  <span className="font-bold text-purple-800">{t.instantDeliveryTag}</span>
+                  <span className="font-black text-purple-900">{instantOrdersCount} × ₹10 = ₹{instantDeliveryFeesTotal}</span>
+                </div>
+
+                <div className="flex justify-between items-center pb-2 border-b border-purple-200 text-xs">
+                  <span className="font-bold text-purple-800">{t.scheduledDeliveryTag}</span>
+                  <span className="font-black text-purple-900">{scheduledOrdersCount} × ₹5 = ₹{scheduledDeliveryFeesTotal}</span>
+                </div>
+
+                <div className="flex justify-between items-center pb-2 border-b border-purple-200 text-xs">
+                  <span className="font-bold text-purple-800">{t.platformFeeTag}</span>
+                  <span className="font-black text-purple-900">{totalOrdersCount} × ₹5 = ₹{totalPlatformFeesToVaayu}</span>
+                </div>
+
+                <div className="bg-purple-200/60 rounded-xl p-3 mt-1">
+                  <p className="text-[12px] font-black text-purple-900 uppercase">{t.totalOwedToVaayu}</p>
+                  <p className="text-[24px] font-black text-purple-950 mt-0.5">₹{totalAmountOwedToVaayu}</p>
+                  <p className="text-[11px] font-bold text-purple-800 mt-1">
+                    (₹{totalDeliveryFeesCollected} Delivery + ₹{totalPlatformFeesToVaayu} Platform Fee)
+                  </p>
+                </div>
+
+                <div className="bg-green-100 rounded-xl p-3 border border-green-300 mt-1">
+                  <p className="text-[12px] font-black text-green-900 uppercase">{t.shopNetEarnings}</p>
+                  <p className="text-[24px] font-black text-green-900 mt-0.5">₹{shopNetFoodEarnings}</p>
+                  <p className="text-[11px] font-bold text-green-800 mt-1">
+                    Total Cash ₹{todayTotalCashCollected} - Vaayu Return ₹{totalAmountOwedToVaayu}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Language Selector */}
             <div className="bg-white rounded-3xl p-5 border-2 border-gray-300 flex flex-col gap-3 shadow-sm">
               <h2 className="text-[16px] font-black text-gray-900">{t.language}</h2>

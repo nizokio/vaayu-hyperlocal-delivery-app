@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, ScrollView, TouchableOpacity, Image, TextInput, Modal, Vibration, Alert } from 'react-native'
+import { View, Text, ScrollView, TouchableOpacity, Image, TextInput, Modal, Vibration } from 'react-native'
 import tw from 'twrnc'
 import Svg, { Path, Rect, Circle, Line, Polyline } from 'react-native-svg'
-
 
 // Language Translations Dictionary for Low-Literacy Shop Owners
 const i18n: Record<string, Record<string, string>> = {
@@ -39,6 +38,16 @@ const i18n: Record<string, Record<string, string>> = {
     timeLeft: "TIME LEFT TO ACCEPT",
     scheduled: "🟢 SCHEDULED ORDER",
     instant: "⚡ INSTANT DELIVERY",
+    subtotal: "Food Items Subtotal",
+    deliveryFee: "Delivery Fee",
+    platformFee: "Platform Fee (Vaayu)",
+    grandTotal: "TOTAL FROM CUSTOMER",
+    financialSummary: "🏦 VAAYU FINANCIAL SETTLEMENT & RETURN VAULT",
+    instantDeliveryTag: "⚡ Instant Delivery Fees (₹10/order)",
+    scheduledDeliveryTag: "🟢 Scheduled Delivery Fees (₹5/order)",
+    platformFeeTag: "🛵 Platform Fees Owed to Vaayu (₹5/order)",
+    totalOwedToVaayu: "💸 CASH TO RETURN TO VAAYU",
+    shopNetEarnings: "💰 SHOP NET FOOD EARNINGS",
   },
   hi: {
     orders: "आर्डर",
@@ -73,6 +82,16 @@ const i18n: Record<string, Record<string, string>> = {
     timeLeft: "स्वीकार करने का समय",
     scheduled: "🟢 निर्धारित आर्डर",
     instant: "⚡ तुरंत डिलिवरी",
+    subtotal: "खाद्य सामग्री कुल",
+    deliveryFee: "डिलिवरी शुल्क",
+    platformFee: "वायु प्लेटफॉर्म शुल्क",
+    grandTotal: "ग्राहक से कुल प्राप्त राशि",
+    financialSummary: "🏦 वायु वित्तीय हिसाब और देय राशि",
+    instantDeliveryTag: "⚡ तुरंत डिलिवरी शुल्क (₹10/आर्डर)",
+    scheduledDeliveryTag: "🟢 निर्धारित डिलिवरी शुल्क (₹5/आर्डर)",
+    platformFeeTag: "🛵 वायु प्लेटफॉर्म शुल्क (₹5/आर्डर)",
+    totalOwedToVaayu: "💸 वायु को लौटाई जाने वाली कुल राशि",
+    shopNetEarnings: "💰 दुकानदार की शुद्ध खाद्य कमाई",
   },
   ta: {
     orders: "ஆர்டர்கள்",
@@ -107,6 +126,16 @@ const i18n: Record<string, Record<string, string>> = {
     timeLeft: "ஏற்றுக்கொள்ள நேரம்",
     scheduled: "🟢 திட்டமிடப்பட்ட ஆர்டர்",
     instant: "⚡ உடனடி டெலிவரி",
+    subtotal: "உணவு மொத்தம்",
+    deliveryFee: "டெலிவரி கட்டணம்",
+    platformFee: "வாயு பிளாட்ஃபார்ம் கட்டணம்",
+    grandTotal: "வாடிக்கையாளர் மொத்தம்",
+    financialSummary: "🏦 வாயு நிதி கணக்கு விவரம்",
+    instantDeliveryTag: "⚡ உடனடி டெலிவரி கட்டணம் (₹10/ஆர்டர்)",
+    scheduledDeliveryTag: "🟢 திட்டமிடப்பட்ட டெலிவரி கட்டணம் (₹5/ஆர்டர்)",
+    platformFeeTag: "🛵 வாயு கட்டணம் (₹5/ஆர்டர்)",
+    totalOwedToVaayu: "💸 வாயுவிற்கு செலுத்த வேண்டிய தொகை",
+    shopNetEarnings: "💰 கடை நிகர வருமானம்",
   }
 }
 
@@ -193,7 +222,6 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
         { id: 'cb_1', name: 'Spicy Paneer Burger', quantity: 2, price: 120, accepted: true },
         { id: 'cb_2', name: 'Salted French Fries', quantity: 1, price: 80, accepted: true }
       ],
-      total: 320,
       paymentMode: 'cod', // cod = 💵, upi = 📱
       status: 'incoming',
       expireTime: Date.now() + 12 * 60 * 1000,
@@ -209,13 +237,24 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
       items: [
         { id: 'cb_2', name: 'Salted French Fries', quantity: 1, price: 80, accepted: true }
       ],
-      total: 80,
       paymentMode: 'upi',
       status: 'preparing',
       expireTime: Date.now() - 5 * 60 * 1000,
       totalDuration: 15 * 60 * 1000
     }
   ])
+
+  // Helper to calculate full order breakdown (Items Subtotal + Delivery Fee + Platform Fee = Grand Total)
+  const getOrderBill = (order: any) => {
+    const isInstant = !(order.deliveryMode === 'regular' || order.selectedSlotLabel)
+    const deliveryFee = isInstant ? 10 : 5
+    const platformFee = 5
+    const itemsSubtotal = order.items
+      .filter((i: any) => i.accepted !== false)
+      .reduce((sum: number, i: any) => sum + i.price * i.quantity, 0)
+    const grandTotal = itemsSubtotal + (itemsSubtotal > 0 ? (deliveryFee + platformFee) : 0)
+    return { isInstant, itemsSubtotal, deliveryFee, platformFee, grandTotal }
+  }
 
   // Live timer tick
   const [now, setNow] = useState(Date.now())
@@ -251,7 +290,6 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
     const secs = diff % 60
     const timeStr = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
 
-    // Color shifting: Green (> 10m) -> Orange (5-10m) -> Red (< 5m)
     let colorClass = 'bg-green-500'
     let textClass = 'text-green-700'
     let bgClass = 'bg-green-50'
@@ -298,11 +336,7 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
       return
     }
 
-    const newTotal = updatedItems
-      .filter((i: any) => i.accepted)
-      .reduce((sum: number, i: any) => sum + i.price * i.quantity, 0)
-
-    setOrders(prev => prev.map(o => o.id === partialOrder.id ? { ...o, items: updatedItems, total: newTotal, status: 'preparing' } : o))
+    setOrders(prev => prev.map(o => o.id === partialOrder.id ? { ...o, items: updatedItems, status: 'preparing' } : o))
     showToast(t.accept)
     setPartialOrder(null)
   }
@@ -336,7 +370,23 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
   }
 
   const incomingCount = orders.filter(o => o.status === 'incoming').length
-  const todayTotal = orders.filter(o => o.status === 'completed' || o.status === 'delivering' || o.status === 'preparing').reduce((s, o) => s + o.total, 0)
+
+  // Financial summary calculations
+  const validOrders = orders.filter(o => o.status !== 'cancelled')
+  const totalOrdersCount = validOrders.length
+
+  const instantOrdersCount = validOrders.filter(o => !(o.deliveryMode === 'regular' || o.selectedSlotLabel)).length
+  const instantDeliveryFeesTotal = instantOrdersCount * 10
+
+  const scheduledOrdersCount = validOrders.filter(o => (o.deliveryMode === 'regular' || o.selectedSlotLabel)).length
+  const scheduledDeliveryFeesTotal = scheduledOrdersCount * 5
+
+  const totalDeliveryFeesCollected = instantDeliveryFeesTotal + scheduledDeliveryFeesTotal
+  const totalPlatformFeesToVaayu = totalOrdersCount * 5
+  const totalAmountOwedToVaayu = totalDeliveryFeesCollected + totalPlatformFeesToVaayu
+
+  const todayTotalCashCollected = validOrders.reduce((sum, o) => sum + getOrderBill(o).grandTotal, 0)
+  const shopNetFoodEarnings = todayTotalCashCollected - totalAmountOwedToVaayu
 
   return (
     <View style={tw`flex-1 bg-gray-100`}>
@@ -406,18 +456,19 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
 
         <View style={tw`flex-1 bg-white rounded-2xl p-4 border border-gray-200`}>
           <Text style={tw`text-[12px] font-black uppercase text-gray-500`}>{t.todayCash}</Text>
-          <Text style={tw`text-[32px] font-black text-gray-900 mt-0.5`}>₹{todayTotal}</Text>
+          <Text style={tw`text-[32px] font-black text-gray-900 mt-0.5`}>₹{todayTotalCashCollected}</Text>
         </View>
       </View>
 
       <ScrollView contentContainerStyle={tw`p-4 pb-36`}>
-        {/* ── 1. ORDERS TAB (Low Literacy Redesign) ────────────────────────── */}
+        {/* ── 1. ORDERS TAB (Detailed Delivery & Platform Fee Breakdown) ────── */}
         {activeTab === 'orders' && (
           <View style={tw`gap-4`}>
             <Text style={tw`text-[18px] font-black text-gray-900`}>{t.orders} ({orders.length})</Text>
 
             {orders.map(order => {
               const timer = getTimerDetails(order.expireTime, order.totalDuration)
+              const bill = getOrderBill(order)
 
               return (
                 <View key={order.id} style={tw`bg-white rounded-3xl p-5 border-2 border-gray-300 shadow-md gap-3`}>
@@ -458,7 +509,6 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
                         <Text style={[tw`text-[13px] font-black`, tw`${timer.textClass}`]}>⏱️ {t.timeLeft}:</Text>
                         <Text style={[tw`text-[18px] font-black font-mono`, tw`${timer.textClass}`]}>{timer.timeStr}</Text>
                       </View>
-                      {/* Visual progress bar fill */}
                       <View style={tw`w-full h-3.5 bg-gray-200 rounded-full overflow-hidden`}>
                         <View style={[tw`h-full rounded-full`, tw`${timer.colorClass}`, { width: `${Math.max(5, Math.min(100, timer.ratio * 100))}%` }]} />
                       </View>
@@ -482,7 +532,7 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
                     </View>
                   )}
 
-                  {/* Items List */}
+                  {/* Items & Fees Breakdown List */}
                   <View style={tw`bg-gray-50 rounded-2xl p-3 gap-2 border border-gray-200`}>
                     {order.items.map((it: any, idx: number) => (
                       <View key={idx} style={tw`flex-row justify-between items-center`}>
@@ -492,13 +542,33 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
                         <Text style={tw`text-[15px] font-black text-gray-900`}>₹{it.price * it.quantity}</Text>
                       </View>
                     ))}
-                    <View style={tw`border-t border-gray-300 pt-2 mt-1 flex-row justify-between items-center`}>
-                      <Text style={tw`text-[16px] font-black text-gray-900`}>TOTAL</Text>
-                      <Text style={tw`text-[20px] font-black text-green-700`}>₹{order.total}</Text>
+
+                    <View style={tw`border-t border-gray-200 pt-2 gap-1.5`}>
+                      <View style={tw`flex-row justify-between items-center`}>
+                        <Text style={tw`text-[13px] font-bold text-gray-600`}>{t.subtotal}</Text>
+                        <Text style={tw`text-[13px] font-black text-gray-800`}>₹{bill.itemsSubtotal}</Text>
+                      </View>
+
+                      <View style={tw`flex-row justify-between items-center`}>
+                        <Text style={tw`text-[13px] font-bold text-blue-700`}>
+                          🛵 {t.deliveryFee} ({bill.isInstant ? '⚡ Instant ₹10' : '🟢 Scheduled ₹5'})
+                        </Text>
+                        <Text style={tw`text-[13px] font-black text-blue-800`}>+₹{bill.deliveryFee}</Text>
+                      </View>
+
+                      <View style={tw`flex-row justify-between items-center`}>
+                        <Text style={tw`text-[13px] font-bold text-purple-700`}>⚡ {t.platformFee}</Text>
+                        <Text style={tw`text-[13px] font-black text-purple-800`}>+₹{bill.platformFee}</Text>
+                      </View>
+
+                      <View style={tw`border-t border-gray-300 pt-2 mt-1 flex-row justify-between items-center`}>
+                        <Text style={tw`text-[15px] font-black text-gray-900`}>{t.grandTotal}</Text>
+                        <Text style={tw`text-[20px] font-black text-green-700`}>₹{bill.grandTotal}</Text>
+                      </View>
                     </View>
                   </View>
 
-                  {/* 30% TALLER ACTION BUTTONS (Minimum 56px height for easy tapping) */}
+                  {/* 30% TALLER ACTION BUTTONS */}
                   <View style={tw`gap-2.5 mt-1`}>
                     {order.status === 'incoming' && (
                       <>
@@ -506,7 +576,7 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
                           onPress={() => handleOpenAcceptModal(order)}
                           style={tw`w-full h-14 bg-green-600 rounded-2xl items-center justify-center shadow-lg active:scale-95`}
                         >
-                          <Text style={tw`text-white font-black text-[17px] uppercase`}>{t.accept} (₹{order.total})</Text>
+                          <Text style={tw`text-white font-black text-[17px] uppercase`}>{t.accept} (₹{bill.grandTotal})</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -554,14 +624,13 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
           </View>
         )}
 
-        {/* ── 2. FOOD STOCK SCREEN (Photos & Giant Single-Tap Switches) ─────── */}
+        {/* ── 2. FOOD STOCK SCREEN ─────────────────────────────────────────── */}
         {activeTab === 'menu' && (
           <View style={tw`gap-4`}>
             {/* Camera-First Prominent Add Food Form */}
             <View style={tw`bg-white rounded-3xl p-5 border-2 border-gray-300 gap-4 shadow-sm`}>
               <Text style={tw`text-[18px] font-black text-gray-900`}>{t.addFood}</Text>
               
-              {/* Prominent Photo Picker Button First */}
               <TouchableOpacity
                 onPress={() => showToast("Photo attached!")}
                 style={tw`w-full h-24 bg-green-50 border-2 border-dashed border-green-500 rounded-2xl items-center justify-center gap-1 active:scale-95`}
@@ -598,7 +667,6 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
             <View style={tw`gap-3`}>
               {menuItems.map(item => (
                 <View key={item.id} style={tw`bg-white rounded-2xl p-4 border-2 border-gray-200 flex-row justify-between items-center gap-3 shadow-xs`}>
-                  {/* Photo Thumbnail */}
                   <Image source={{ uri: item.img }} style={tw`w-16 h-16 rounded-xl`} resizeMode="cover" />
 
                   <View style={tw`flex-1 min-w-0`}>
@@ -606,7 +674,6 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
                     <Text style={tw`text-[15px] font-black text-green-700 mt-0.5`}>₹{item.price}</Text>
                   </View>
 
-                  {/* GIANT SINGLE-TAP STOCK SWITCH (Green = IN, Red = OUT) */}
                   <TouchableOpacity
                     onPress={() => {
                       triggerHaptic()
@@ -628,9 +695,47 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
           </View>
         )}
 
-        {/* ── 3. SETTINGS & LANGUAGE TOGGLE ────────────────────────────────── */}
+        {/* ── 3. SETTINGS & VAAYU FINANCIAL BREAKDOWN VAULT ─────────────────── */}
         {activeTab === 'settings' && (
           <View style={tw`gap-4`}>
+            {/* VAAYU FINANCIAL SETTLEMENT & RETURN VAULT */}
+            <View style={tw`bg-white rounded-3xl p-5 border-2 border-purple-300 gap-4 shadow-sm`}>
+              <Text style={tw`text-[17px] font-black text-purple-900 uppercase`}>{t.financialSummary}</Text>
+              
+              <View style={tw`bg-purple-50 rounded-2xl p-4 border border-purple-200 gap-2.5`}>
+                <View style={tw`flex-row justify-between items-center pb-2 border-b border-purple-200`}>
+                  <Text style={tw`text-[13px] font-bold text-purple-800`}>{t.instantDeliveryTag}</Text>
+                  <Text style={tw`text-[14px] font-black text-purple-900`}>{instantOrdersCount} × ₹10 = ₹{instantDeliveryFeesTotal}</Text>
+                </View>
+
+                <View style={tw`flex-row justify-between items-center pb-2 border-b border-purple-200`}>
+                  <Text style={tw`text-[13px] font-bold text-purple-800`}>{t.scheduledDeliveryTag}</Text>
+                  <Text style={tw`text-[14px] font-black text-purple-900`}>{scheduledOrdersCount} × ₹5 = ₹{scheduledDeliveryFeesTotal}</Text>
+                </View>
+
+                <View style={tw`flex-row justify-between items-center pb-2 border-b border-purple-200`}>
+                  <Text style={tw`text-[13px] font-bold text-purple-800`}>{t.platformFeeTag}</Text>
+                  <Text style={tw`text-[14px] font-black text-purple-900`}>{totalOrdersCount} × ₹5 = ₹{totalPlatformFeesToVaayu}</Text>
+                </View>
+
+                <View style={tw`bg-purple-200/60 rounded-xl p-3 mt-1`}>
+                  <Text style={tw`text-[12px] font-black text-purple-900 uppercase`}>{t.totalOwedToVaayu}</Text>
+                  <Text style={tw`text-[24px] font-black text-purple-950 mt-0.5`}>₹{totalAmountOwedToVaayu}</Text>
+                  <Text style={tw`text-[11px] font-bold text-purple-800 mt-1`}>
+                    (₹{totalDeliveryFeesCollected} Delivery + ₹{totalPlatformFeesToVaayu} Platform Fee)
+                  </Text>
+                </View>
+
+                <View style={tw`bg-green-100 rounded-xl p-3 border border-green-300 mt-1`}>
+                  <Text style={tw`text-[12px] font-black text-green-900 uppercase`}>{t.shopNetEarnings}</Text>
+                  <Text style={tw`text-[24px] font-black text-green-900 mt-0.5`}>₹{shopNetFoodEarnings}</Text>
+                  <Text style={tw`text-[11px] font-bold text-green-800 mt-1`}>
+                    Total Cash ₹{todayTotalCashCollected} - Vaayu Return ₹{totalAmountOwedToVaayu}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
             {/* Language Selector Box */}
             <View style={tw`bg-white rounded-3xl p-5 border-2 border-gray-300 gap-3 shadow-sm`}>
               <Text style={tw`text-[16px] font-black text-gray-900`}>{t.language}</Text>
@@ -739,7 +844,7 @@ export default function OwnerDashboard({ user, onSignOut }: OwnerDashboardProps)
         </View>
       </Modal>
 
-      {/* ── Sliding Capsule Bottom Navigation Bar (Larger Icons) ── */}
+      {/* ── Sliding Capsule Bottom Navigation Bar ── */}
       <View style={tw`absolute bottom-4 left-4 right-4 z-40`}>
         <View style={[tw`rounded-[28px] p-1 border shadow-xl`, { backgroundColor: 'rgba(255, 255, 255, 0.96)', borderColor: 'rgba(255, 255, 255, 0.6)' }]}>
           <View style={tw`flex-row items-center justify-around py-1 px-1`}>
